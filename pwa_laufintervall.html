@@ -1,0 +1,306 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<link rel="manifest" href="manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('service-worker.js');
+    });
+  }
+</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laufintervall Analyse</title>
+</head>
+<body>
+    
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<link rel="manifest" href="manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('service-worker.js');
+    });
+  }
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Laufintervall Analyse</title>
+<style>
+        body.dark {
+            background-color: #1e2a38;
+            color: #cce4ff;
+        }
+        body.light {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #cce4ff;
+            color: #1e2a38;
+        }
+        input {
+            width: 100%;
+            padding: 4px;
+        }
+        body.dark input {
+    color: #1e2a38;
+            background-color: #cce4ff;
+            color: #000000;
+            border: 1px solid #888;
+        }
+        #addRow {
+            margin-top: 10px;
+        }
+        .mode-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 12px;
+            background-color: #2e86de;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+    
+input {
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    padding: 6px;
+    font-size: 16px;
+}
+body.dark input {
+    background-color: #cce4ff;
+    color: #1e2a38;
+    border: 1px solid #888;
+}
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+th, td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+th {
+    background-color: #cce4ff;
+    color: #1e2a38;
+    border-top: 1px solid #ccc;
+}
+
+body { font-family: 'ADLaM Display', cursive; }
+input, th, td { border: none !important; }
+body {
+    font-family: 'ADLaM Display', cursive;
+    margin: 0;
+    padding: 20px;
+    background-color: #1e2a38;
+    color: #cce4ff;
+}
+h1 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+p {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+th, td {
+    padding: 12px;
+    text-align: center;
+    border: none;
+}
+th {
+    background-color: #cce4ff;
+    color: #1e2a38;
+    border-radius: 10px 10px 0 0;
+    font-size: 16px;
+}
+td {
+    background-color: #2a3b55;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+input {
+    width: 90%;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: none;
+    background-color: #cce4ff;
+    color: #1e2a38;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+#addRow {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #2e86de;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+h3 {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 20px;
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=ADLaM+Display&amp;display=swap" rel="stylesheet"/></head>
+<body>
+<h1>Laufintervall Analyse</h1>
+<p>Gib Pace (min:sec/km) und Dauer (min) für jedes Intervall ein:</p>
+<table id="intervalTable">
+<thead>
+<tr>
+<th>Intervall</th>
+<th>Pace (min:sec/km)</th>
+<th>Dauer (min)</th>
+<th>Strecke (km)</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<button id="addRow">+ Intervall hinzufügen</button>
+<h3>Gesamtstrecke: <span id="totalDistance">0</span> km</h3>
+<script>
+function normalizePaceInput(paceStr) {
+    paceStr = paceStr.replace(/[^0-9]/g, "");
+    if (paceStr.length === 1 || paceStr.length === 2) {
+        return paceStr.padStart(2, "0") + ":00";
+    }
+    if (paceStr.length === 3) paceStr = "0" + paceStr;
+    if (paceStr.length === 4) {
+        const min = paceStr.slice(0, 2);
+        const sec = paceStr.slice(2);
+        return `${min}:${sec}`;
+    }
+    return paceStr;
+}
+
+function parsePace(paceStr) {
+    paceStr = normalizePaceInput(paceStr);
+    const parts = paceStr.split(":");
+    if (parts.length !== 2) return NaN;
+    const min = parseInt(parts[0]);
+    const sec = parseInt(parts[1]);
+    return min + sec / 60;
+}
+
+function formatPaceFields() {
+    const rows = document.querySelectorAll("#intervalTable tbody tr");
+    rows.forEach(row => {
+        const paceInput = row.cells[1].querySelector("input");
+        const durationInput = row.cells[2].querySelector("input");
+        paceInput.addEventListener("blur", () => {
+            const formatted = normalizePaceInput(paceInput.value);
+            if (formatted.includes(":")) {
+                paceInput.value = formatted;
+            }
+        });
+        paceInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                const formatted = normalizePaceInput(paceInput.value);
+                if (formatted.includes(":")) {
+                    paceInput.value = formatted;
+                }
+                durationInput.focus();
+            }
+        });
+        durationInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                const nextRow = row.nextElementSibling;
+                if (nextRow) {
+                    const nextPace = nextRow.cells[1].querySelector("input");
+                    nextPace.focus();
+                }
+            }
+        });
+    });
+}
+
+function calculateDistances() {
+    let total = 0;
+    const rows = document.querySelectorAll("#intervalTable tbody tr");
+    rows.forEach(row => {
+        const paceInput = row.cells[1].querySelector("input").value;
+        const durationInput = row.cells[2].querySelector("input").value;
+        const pace = parsePace(paceInput);
+        const duration = parseFloat(durationInput);
+        let distanceCell = row.cells[3];
+        if (!isNaN(pace) && !isNaN(duration) && pace > 0) {
+            const distance = (duration / pace).toFixed(2);
+            distanceCell.textContent = distance;
+            total += parseFloat(distance);
+        } else {
+            distanceCell.textContent = "";
+        }
+    });
+    document.getElementById("totalDistance").textContent = total.toFixed(2);
+}
+
+function addRow(index) {
+    const table = document.querySelector("#intervalTable tbody");
+    const newRow = document.createElement("tr");
+    newRow.innerHTML = `
+        <td>${index}</td>
+        <td><input type="text" placeholder="z.B. 5:00"></td>
+        <td><input type="number" placeholder="z.B. 30"></td>
+        <td class="distance"></td>
+    `;
+    table.appendChild(newRow);
+    formatPaceFields();
+}
+
+document.getElementById("addRow").addEventListener("click", () => {
+    const table = document.querySelector("#intervalTable tbody");
+    const rowCount = table.rows.length + 1;
+    addRow(rowCount);
+});
+
+document.addEventListener("input", calculateDistances);
+
+window.onload = () => {
+    document.body.classList.add('dark');
+    for (let i = 1; i <= 4; i++) {
+        addRow(i);
+    }
+};
+</script></body>
+</html>
+
+</body>
+</html>
